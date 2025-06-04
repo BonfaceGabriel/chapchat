@@ -14,6 +14,8 @@ from pathlib import Path
 from decouple import config
 import os
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,6 +30,12 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
+APP_DOMAIN = config('APP_DOMAIN', default=None) # Will be like 'your-app.herokuapp.com' or your custom domain
+if DEBUG:
+    ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost'])
+if APP_DOMAIN:
+    ALLOWED_HOSTS.append(APP_DOMAIN)
+    ALLOWED_HOSTS.append(f"www.{APP_DOMAIN}")
 
 
 # Application definition
@@ -44,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,6 +95,14 @@ DATABASES = {
     }
 }
 
+DATABASE_URL_ENV = config('DATABASE_URL', default=None) # Renamed for clarity
+if DATABASE_URL_ENV:
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL_ENV,
+        conn_max_age=600,
+        ssl_require=config('DB_SSL_REQUIRE', default=True, cast=bool) # Render might need ssl_require=True
+    )
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -121,8 +138,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Directory where Django will collect all static files
+
+# WhiteNoise configuration for compressed static files (optional but good)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REST Framework settings
+REST_FRAMEWORK = {}
