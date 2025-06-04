@@ -36,6 +36,10 @@ if DEBUG:
 if APP_DOMAIN:
     ALLOWED_HOSTS.append(APP_DOMAIN)
     ALLOWED_HOSTS.append(f"www.{APP_DOMAIN}")
+else:
+    # Fallback if APP_DOMAIN is somehow not set, though it should be
+    if not DEBUG: # Only log if not in debug and APP_DOMAIN is missing
+        print("WARNING: APP_DOMAIN environment variable is not set.")
 
 
 # Application definition
@@ -48,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'chapchat',
 ]
 
 MIDDLEWARE = [
