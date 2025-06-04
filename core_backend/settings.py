@@ -84,24 +84,29 @@ WSGI_APPLICATION = 'core_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432', cast=int),
-    }
-}
+DATABASE_URL_ENV = config('DATABASE_URL', default=None)
 
-DATABASE_URL_ENV = config('DATABASE_URL', default=None) # Renamed for clarity
 if DATABASE_URL_ENV:
-    DATABASES['default'] = dj_database_url.config(
-        default=DATABASE_URL_ENV,
-        conn_max_age=600,
-        ssl_require=config('DB_SSL_REQUIRE', default=True, cast=bool) # Render might need ssl_require=True
-    )
+    # Production configuration using DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL_ENV,
+            conn_max_age=600,
+            ssl_require=config('DB_SSL_REQUIRE', default=True, cast=bool)
+        )
+    }
+else:
+    # Local development configuration using individual .env variables
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432', cast=int),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
