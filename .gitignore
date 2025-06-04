@@ -1,3 +1,6 @@
 env/
 .env
 
+node_modules/ # General catch-all
+chapchat_dash/node_modules/ # More specific if needed
+chapchat_dash/dist/
