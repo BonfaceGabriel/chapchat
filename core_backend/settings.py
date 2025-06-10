@@ -78,9 +78,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080", # Your Vue dev server
     "http://127.0.0.1:8080",
     "http://localhost:8081",
-    "http://192.168.137.127:8081",
+    "http://192.168.137.127:8081", 
 ]
 
+FRONTEND_URL = config('FRONTEND_URL', default=None)
+if FRONTEND_URL:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+    
 ROOT_URLCONF = 'core_backend.urls'
 
 TEMPLATES = [
