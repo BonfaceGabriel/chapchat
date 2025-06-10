@@ -45,6 +45,7 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',  # For handling CORS headers
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,11 +53,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt', 
     'chapchat',
+    'accounts',
+    'sellers',
+    'products',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,6 +71,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080", # Your Vue dev server
+    "http://127.0.0.1:8080",
+    "http://localhost:8081",
+    "http://192.168.137.127:8081",
 ]
 
 ROOT_URLCONF = 'core_backend.urls'
@@ -112,6 +127,8 @@ else:
             'PORT': config('DB_PORT', default='5432', cast=int),
         }
     }
+#print(f"DEBUG: DB_NAME from decouple is: {config('DB_NAME', default='NOT_FOUND')}")
+#print(f"DEBUG: DB_USER from decouple is: {config('DB_USER', default='NOT_FOUND')}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -131,6 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'accounts.User'  # Use the custom User model from accounts app
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -159,4 +177,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework settings
-REST_FRAMEWORK = {}
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
