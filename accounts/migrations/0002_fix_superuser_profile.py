@@ -36,7 +36,7 @@ def ensure_superuser_profile(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0002_create_initial_superuser'), # Depends on the previous migration
+        ('accounts', '0001_initial.py'), # Depends on the previous migration
         ('sellers', '0001_initial'), # Also depends on the sellers app existing
     ]
 
