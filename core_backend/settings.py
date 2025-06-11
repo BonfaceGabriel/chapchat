@@ -73,16 +73,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080", # Your Vue dev server
-    "http://127.0.0.1:8080",
-    "http://localhost:8081",
-    "http://192.168.137.127:8081", 
-]
+# CORS CONFIGURATION
+CORS_ALLOWED_ORIGINS = [] # Start with an empty list
 
+# Get the frontend URL from the environment variables
 FRONTEND_URL = config('FRONTEND_URL', default=None)
-if FRONTEND_URL:
+
+if DEBUG:
+    # In development, allow the local Vue server
+    CORS_ALLOWED_ORIGINS.extend([
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ])
+elif FRONTEND_URL:
+    # In production, only allow the deployed frontend URL
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
     
 ROOT_URLCONF = 'core_backend.urls'
