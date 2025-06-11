@@ -139,7 +139,6 @@ const handleProfileUpdate = async () => {
     // A better approach would be to track if they've been "dirtied" by the user.
     mpesa_passkey: profileData.value.mpesa_passkey,
     whatsapp_phone_number_id: profileData.value.whatsapp_phone_number_id,
-   
   };
 
   try {
@@ -233,9 +232,9 @@ button:disabled {
   margin-bottom: 1rem;
 }
 .help-text {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: -0.5rem;
-    margin-bottom: 0.5rem;
-  }
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
 </style>
