@@ -18,9 +18,7 @@ class SellerProfile(models.Model):
     mpesa_consumer_secret = models.CharField(max_length=100, blank=True, null=True) # Consider encrypted field
 
     # WhatsApp Configuration
-    whatsapp_bsp_api_key = models.CharField(max_length=255, blank=True, null=True) # Consider encrypted field
-    whatsapp_phone_number_id = models.CharField(max_length=255, blank=True, null=True) # From BSP
-    whatsapp_app_id = models.CharField(max_length=255, blank=True, null=True) # From BSP, if applicable
+    whatsapp_phone_number_id = models.CharField(max_length=255, blank=True, null=True) # From Meta's WhatsApp API
 
     # Add other seller-specific settings here as needed
     # e.g., currency, default_language, branding_logo_url, etc.

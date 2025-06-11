@@ -62,15 +62,17 @@
       <div class="profile-section">
         <h3>WhatsApp Configuration</h3>
         <div class="form-group">
-          <label for="whatsappApiKey">WhatsApp BSP API Key</label>
+          <label for="whatsappPhoneNumberId">WhatsApp Phone Number ID</label>
+          <p class="help-text">
+            Find this in your Meta for Developers App under WhatsApp > API
+            Setup.
+          </p>
           <input
-            type="password"
-            id="whatsappApiKey"
-            v-model="profileData.whatsapp_bsp_api_key"
-            placeholder="Enter new key to update"
+            type="text"
+            id="whatsappPhoneNumberId"
+            v-model="profileData.whatsapp_phone_number_id"
           />
         </div>
-        <!-- Add other WhatsApp fields here -->
       </div>
 
       <div v-if="updateSuccess" class="success-message">
@@ -136,8 +138,8 @@ const handleProfileUpdate = async () => {
     // For simplicity now, we'll send them if they have a value.
     // A better approach would be to track if they've been "dirtied" by the user.
     mpesa_passkey: profileData.value.mpesa_passkey,
-    whatsapp_bsp_api_key: profileData.value.whatsapp_bsp_api_key,
-    // Add other writable fields here
+    whatsapp_phone_number_id: profileData.value.whatsapp_phone_number_id,
+   
   };
 
   try {
@@ -230,4 +232,10 @@ button:disabled {
   color: green;
   margin-bottom: 1rem;
 }
+.help-text {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+  }
 </style>

@@ -28,9 +28,7 @@ class SellerProfileSerializer(serializers.ModelSerializer):
             'mpesa_passkey',
             'mpesa_consumer_key',
             'mpesa_consumer_secret',
-            'whatsapp_bsp_api_key',
             'whatsapp_phone_number_id',
-            'whatsapp_app_id',
             'created_at', # Read-only
             'updated_at'  # Read-only
         ]
