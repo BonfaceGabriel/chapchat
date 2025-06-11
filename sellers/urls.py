@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import SellerProfileDetailView
 
-app_name = 'retailers'
+app_name = 'sellers'
 
 urlpatterns = [
     path('profile/', SellerProfileDetailView.as_view(), name='seller_profile_detail'),

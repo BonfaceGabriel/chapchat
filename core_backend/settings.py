@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'accounts',
     'sellers',
     'products',
+    'whatsapp_comms',
 
 ]
 
@@ -135,8 +136,10 @@ else:
             'PORT': config('DB_PORT', default='5432', cast=int),
         }
     }
-#print(f"DEBUG: DB_NAME from decouple is: {config('DB_NAME', default='NOT_FOUND')}")
-#print(f"DEBUG: DB_USER from decouple is: {config('DB_USER', default='NOT_FOUND')}")
+
+WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
+WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
+WHATSAPP_VERIFY_TOKEN = config('WHATSAPP_VERIFY_TOKEN', default='')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
