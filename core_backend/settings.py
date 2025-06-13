@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'sellers',
     'products',
     'whatsapp_comms',
+    'orders',
 
 ]
 
@@ -77,6 +78,11 @@ MIDDLEWARE = [
 # CORS CONFIGURATION
 CORS_ALLOWED_ORIGINS = [] # Start with an empty list
 
+ALLOWED_HOSTS = [
+    "2803-41-89-10-241.ngrok-free.app",
+    "127.0.0.1",
+]  # Add your ngrok URL or any other allowed hosts
+
 # Get the frontend URL from the environment variables
 FRONTEND_URL = config('FRONTEND_URL', default=None)
 
@@ -85,6 +91,7 @@ if DEBUG:
     CORS_ALLOWED_ORIGINS.extend([
         "http://localhost:8080",
         "http://127.0.0.1:8080",
+        "https://2803-41-89-10-241.ngrok-free.app",  # Example ngrok URL, replace with your own if needed
     ])
 elif FRONTEND_URL:
     # In production, only allow the deployed frontend URL
@@ -137,9 +144,17 @@ else:
         }
     }
 
+# Whatsapp API configuration
+# These should be set in your .env file or environment variables
 WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
 WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
 WHATSAPP_VERIFY_TOKEN = config('WHATSAPP_VERIFY_TOKEN', default='')
+
+# Mpesa Pay configuration
+MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY', default='')
+MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET', default='')
+MPESA_SHORTCODE = config('MPESA_SHORTCODE', default='')
+MPESA_PASSKEY = config('MPESA_PASSKEY', default='')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

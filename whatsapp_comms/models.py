@@ -12,8 +12,15 @@ class Customer(models.Model):
 class Conversation(models.Model):
     class ConversationState(models.TextChoices):
         STARTED = 'STARTED', 'Started'
-        AWAITING_PRODUCT_QUERY = 'AWAITING_PRODUCT_QUERY', 'Awaiting Product Query'
-        # We will add more states like BROWSING_PRODUCTS, IN_CART, etc. later
+        AWAITING_COMMAND = 'AWAITING_COMMAND', 'Awaiting Command'
+        AWAITING_PRODUCT_SELECTION = 'AWAITING_PRODUCT_SELECTION', 'Awaiting Product Selection'
+        AWAITING_PRODUCT_ACTION = 'AWAITING_PRODUCT_ACTION', 'Awaiting Product Action'
+        AWAITING_SIZE_SELECTION = 'AWAITING_SIZE_SELECTION', 'Awaiting Size Selection'  
+        AWAITING_QUANTITY = 'AWAITING_QUANTITY', 'Awaiting Quantity'
+        VIEWING_CART = 'VIEWING_CART', 'Viewing Cart'
+        AWAITING_DELIVERY_CHOICE = 'AWAITING_DELIVERY_CHOICE', 'Awaiting Delivery Choice'   
+        AWAITING_DELIVERY_ADDRESS = 'AWAITING_DELIVERY_ADDRESS', 'Awaiting Delivery Address'    
+        AWAITING_PAYMENT_CONFIRMATION = 'AWAITING_PAYMENT_CONFIRMATION', 'Awaiting Payment Confirmation'    
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='conversations')
     seller = models.ForeignKey(SellerProfile, on_delete=models.CASCADE, related_name='conversations')

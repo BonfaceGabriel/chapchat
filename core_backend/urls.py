@@ -43,4 +43,7 @@ urlpatterns = [
     # Include the WhatsApp communications app URLs
     path('api/whatsapp/', include('whatsapp_comms.urls')),
 
+    # Include the payments app URLs
+    path('api/payments/', include('payments.urls')),
+
 ]
