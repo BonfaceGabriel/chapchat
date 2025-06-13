@@ -81,6 +81,8 @@ CORS_ALLOWED_ORIGINS = [] # Start with an empty list
 ALLOWED_HOSTS = [
     "2803-41-89-10-241.ngrok-free.app",
     "127.0.0.1",
+    "chapchat-94s8.onrender.com",
+
 ]  # Add your ngrok URL or any other allowed hosts
 
 # Get the frontend URL from the environment variables
