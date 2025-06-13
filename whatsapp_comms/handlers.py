@@ -461,8 +461,7 @@ def handle_state_awaiting_delivery_address(conversation, message_details):
     
 def handle_state_awaiting_payment_confirmation(conversation, message_details):
     """
-    This state is entered right after we decide to trigger an STK push.
-    It doesn't process user input, it PERFORMS the payment action.
+    This state's only job is to trigger the STK push by calling the M-Pesa service.
     """
     try:
         cart = Order.objects.get(
@@ -471,25 +470,20 @@ def handle_state_awaiting_payment_confirmation(conversation, message_details):
             status=Order.OrderStatus.IN_PROGRESS
         )
         
-        # The public URL of our deployed application for the callback
-        # We'll create this webhook in a later step
-        callback_url = f"https://chapchat-94s8.onrender.com/api/payments/mpesa-callback/"
-        
-        # Initiate the STK Push
+        # Call our centralized M-Pesa service
         response = initiate_stk_push(
             phone_number=conversation.customer.phone_number,
             amount=cart.total_amount,
-            order_id=cart.id,
-            callback_url=callback_url
+            order_id=cart.id
+            # The callback URL is now handled inside the service itself
         )
 
         if response and response.get('ResponseCode') == '0':
-            # STK Push was successfully initiated
-            # Update the order status
-            cart.status = Order.OrderStatus.PENDING_PAYMENT
-            # Store the CheckoutRequestID to link the callback later
-            cart.mpesa_checkout_request_id = response.get('CheckoutRequestID') # Requires adding this field to Order model
-            cart.save()
+            # STK Push was successfully initiated by the service
+            order = cart # Use the same object
+            order.status = Order.OrderStatus.PENDING_PAYMENT
+            order.mpesa_checkout_request_id = response.get('CheckoutRequestID')
+            order.save()
             
             return "A payment prompt has been sent to your phone. Please enter your M-Pesa PIN to complete the transaction."
         else:

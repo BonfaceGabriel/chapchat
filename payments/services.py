@@ -23,9 +23,10 @@ def get_mpesa_access_token():
         return None
 
 # Main function to initiate the STK Push
-def initiate_stk_push(phone_number, amount, order_id, callback_url):
+def initiate_stk_push(phone_number, amount, order_id):
     """
-    Initiates an M-Pesa STK Push request for a given phone number and amount.
+    Initiates an M-Pesa STK Push request.
+    This version dynamically builds the callback URL from environment variables.
     """
     access_token = get_mpesa_access_token()
     if not access_token:
@@ -39,31 +40,43 @@ def initiate_stk_push(phone_number, amount, order_id, callback_url):
     shortcode = settings.MPESA_SHORTCODE
     passkey = settings.MPESA_PASSKEY
     
-    # Generate the password as per M-Pesa guidelines (Base64 of Shortcode+Passkey+Timestamp)
     password_str = f"{shortcode}{passkey}{timestamp}"
-    password_bytes = password_str.encode('utf-8')
-    password = base64.b64encode(password_bytes).decode('utf-8')
+    password = base64.b64encode(password_str.encode('utf-8')).decode('utf-8')
 
-    # Format the phone number to Safaricom's required format (e.g., 254...)
-    # Assuming input is like '+2547...' or '07...'. This logic should be robust.
+    # Format phone number
     if phone_number.startswith('+'):
         formatted_phone = phone_number[1:]
     elif phone_number.startswith('0'):
         formatted_phone = f"254{phone_number[1:]}"
     else:
-        formatted_phone = phone_number # Assume it's already in the correct format
+        formatted_phone = phone_number
 
+    # --- THIS IS THE CRUCIAL FIX ---
+    # Build the callback URL dynamically from the APP_DOMAIN env var
+    # instead of hardcoding it.
+    app_domain = settings.APP_DOMAIN # We get this from our settings file
+    if not app_domain:
+        print("ERROR: APP_DOMAIN environment variable is not set. Cannot form callback URL.")
+        return None
+    
+    # Ensure the domain starts with https:// for production
+    if not app_domain.startswith('http'):
+         app_domain = f"https://{app_domain}"
+
+    callback_url = f"{app_domain}/api/payments/mpesa-callback/"
+    print(f"Using M-Pesa callback URL: {callback_url}")
+    
     payload = {
         "BusinessShortCode": shortcode,
         "Password": password,
         "Timestamp": timestamp,
-        "TransactionType": "CustomerPayBillOnline", # Or "CustomerBuyGoodsOnline"
-        "Amount": int(amount), # Amount must be an integer
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": int(amount),
         "PartyA": formatted_phone,
         "PartyB": shortcode,
         "PhoneNumber": formatted_phone,
-        "CallBackURL": callback_url,
-        "AccountReference": str(order_id), # Must be a string
+        "CallBackURL": callback_url, # Use the dynamically generated URL
+        "AccountReference": str(order_id),
         "TransactionDesc": f"Payment for Order #{order_id}"
     }
 
