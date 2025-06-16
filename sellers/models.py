@@ -20,6 +20,14 @@ class SellerProfile(models.Model):
     # WhatsApp Configuration
     whatsapp_phone_number_id = models.CharField(max_length=255, blank=True, null=True) # From Meta's WhatsApp API
 
+    #notification configuration
+    notification_phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="The WhatsApp number (e.g., 2547...) where you'll receive order alerts."
+    )
+
     # Add other seller-specific settings here as needed
     # e.g., currency, default_language, branding_logo_url, etc.
 

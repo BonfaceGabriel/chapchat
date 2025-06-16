@@ -4,3 +4,10 @@ env/
 node_modules/ # General catch-all
 chapchat_dash/node_modules/ # More specific if needed
 chapchat_dash/dist/
+chapchat_dash/.env*.local
+chapchat_dash/dist/
+
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

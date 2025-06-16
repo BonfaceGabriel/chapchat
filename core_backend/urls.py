@@ -46,4 +46,7 @@ urlpatterns = [
     # Include the payments app URLs
     path('api/payments/', include('payments.urls')),
 
+    # Include the orders app URLs
+    path('api/orders/', include('orders.urls')),
+
 ]
