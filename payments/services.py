@@ -54,7 +54,8 @@ def initiate_stk_push(phone_number, amount, order_id):
     # --- THIS IS THE CRUCIAL FIX ---
     # Build the callback URL dynamically from the APP_DOMAIN env var
     # instead of hardcoding it.
-    app_domain = settings.APP_DOMAIN # We get this from our settings file
+    app_domain = settings.APP_DOMAIN
+    print(f"APP_DOMAIN: {settings.APP_DOMAIN}") # We get this from our settings file
     if not app_domain:
         print("ERROR: APP_DOMAIN environment variable is not set. Cannot form callback URL.")
         return None

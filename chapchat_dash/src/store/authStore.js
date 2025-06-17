@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import apiClient from '../services/api'; // We still need it to make calls
+import apiClient from '../services/api';
 
 export const useAuthStore = create(
   persist(
@@ -26,10 +26,7 @@ export const useAuthStore = create(
 
           const { access, refresh } = response.data;
           set({ accessToken: access, refreshToken: refresh, isLoading: false });
-          
-          // Fetch profile after setting token
           await get().fetchUserProfile();
-
         } catch (err) {
           const errorMessage = err.response?.data?.detail || 'Invalid credentials. Please try again.';
           set({ error: errorMessage, isLoading: false });
@@ -41,7 +38,7 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await apiClient.post('accounts/register/', userData);
-          set({ isLoading: false });
+          set({ isLoading: false }); 
           return response.data;
         } catch (err) {
           set({ isLoading: false });
@@ -54,10 +51,33 @@ export const useAuthStore = create(
         set({ isLoading: true });
         try {
           const response = await apiClient.get('seller/profile/');
-          set({ user: response.data, isLoading: false });
+          set({ user: response.data, isLoading: false, error: null });
         } catch (err) {
           console.error('Failed to fetch user profile:', err);
           get().logout();
+        }
+      },
+
+      // (+) NEW ACTION TO HANDLE TOKEN REFRESH
+      refreshtoken: async () => {
+        const currentRefreshToken = get().refreshToken;
+        if (!currentRefreshToken) {
+            console.log("No refresh token available.");
+            return Promise.reject(new Error("No refresh token."));
+        }
+
+        try {
+            const response = await apiClient.post('token/refresh/', {
+                refresh: currentRefreshToken,
+            });
+            const { access } = response.data;
+            set({ accessToken: access });
+            return access; // Return the new access token
+        } catch (err) {
+            console.error("Failed to refresh token:", err);
+            // If refresh fails, the user's session is invalid. Log them out.
+            get().logout();
+            return Promise.reject(err);
         }
       },
 
@@ -68,15 +88,15 @@ export const useAuthStore = create(
           user: null,
           error: null,
         });
-        // The interceptor will handle not adding the header anymore.
+        // We navigate from the component that calls logout.
       },
     }),
     {
-      name: 'auth-storage', // Name for the localStorage item
-      partialize: (state) => ({
-        accessToken: state.accessToken,
+      name: 'auth-storage',
+      partialize: (state) => ({ 
+        accessToken: state.accessToken, 
         refreshToken: state.refreshToken,
-        user: state.user,
+        user: state.user 
       }),
     }
   )
