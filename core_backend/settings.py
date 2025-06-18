@@ -217,20 +217,23 @@ REST_FRAMEWORK = {
     ),
 }
 
-if config('DATABASE_URL', default=None):
-    # Production configuration using channels-postgres
+if not DEBUG:
+    # Production configuration using channels-postgres.
+    # It uses the same database as our main Django application.
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_postgres.core.PostgresChannelLayer",
             "CONFIG": {
-                # Use the same database as our main application for simplicity.
-                # The library will create its own tables ('channels_postgres_group', etc.)
-                "dsn": config('DATABASE_URL'),
+                # We tell channels-postgres to use the 'default' database connection
+                # that we have already configured above with dj_database_url.
+                # This is the cleanest way and avoids duplicating credentials.
+                "db_alias": "default",
             },
         },
     }
 else:
-    # Development configuration using in-memory layer
+    # Development configuration using the simple in-memory layer.
+    # This requires no extra setup for local testing.
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer"
