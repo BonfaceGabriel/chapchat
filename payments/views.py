@@ -7,6 +7,9 @@ import json
 
 # We can reuse the whatsapp_comms send_whatsapp_message helper
 from whatsapp_comms.views import send_whatsapp_message
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -73,22 +76,30 @@ def mpesa_callback(request):
                 )
                 send_whatsapp_message(customer_phone, customer_message)
                 
-                # --- Notify Seller ---
+                channel_layer = get_channel_layer()
                 seller = order.seller
-                if seller.notification_phone_number:
-                    order_items_summary = "\n".join(
-                        [f"- {item.quantity} x {item.product.name}" for item in order.items.all()]
-                    )
-                    seller_message = (
-                        f"🎉 New Paid Order!\n\n"
-                        f"You have a new order (#{order.id}) for *KES {order.total_amount:.2f}*.\n\n"
-                        f"Items:\n{order_items_summary}\n\n"
-                        "Please log in to your dashboard to approve and fulfill the order."
-                    )
-                    send_whatsapp_message(seller.notification_phone_number, seller_message)
-                else:
-                    print(f"Seller {seller.user.username} has no notification number set. Skipping notification.")
+                room_group_name = f'seller_inbox_{seller.pk}'
 
+                # Prepare the data to send. We can serialize the order data.
+                # For now, a simple dictionary is fine for testing.
+                order_data_payload = {
+                    'id': order.id,
+                    'customer_name': order.customer.name or order.customer.phone_number,
+                    'total_amount': str(order.total_amount),
+                    'status': order.get_status_display(),
+                    'created_at': order.created_at.isoformat(),
+                }
+
+                # The 'type' key in this dictionary ('new_order_notification') MUST
+                # match the name of a method in our InboxConsumer.
+                async_to_sync(channel_layer.group_send)(
+                    room_group_name,
+                    {
+                        "type": "new_order_notification",
+                        "order": order_data_payload
+                    }
+                )
+                print(f"Sent 'new_order' notification to WebSocket group {room_group_name}")
             else:
                 # Payment failed or was cancelled
                 result_desc = stk_callback.get('ResultDesc', 'Payment was not completed.')

@@ -31,6 +31,7 @@ DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 APP_DOMAIN = config('APP_DOMAIN', default=None) # Will be like 'your-app.herokuapp.com' or your custom domain
+# APP_DOMAIN = '6a9f-41-57-97-104.ngrok-free.app' # Will be like 'your-app.herokuapp.com' or your custom domain
 if DEBUG:
     ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost'])
 if APP_DOMAIN:
@@ -45,6 +46,7 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # For running the ASGI server
     'corsheaders',  # For handling CORS headers
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,15 +54,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt', 
+    'channels',  # For WebSocket support
     'chapchat',
     'accounts',
     'sellers',
     'products',
     'whatsapp_comms',
     'orders',
-
+    'rest_framework',
+    'rest_framework_simplejwt', 
+    
 ]
 
 MIDDLEWARE = [
@@ -79,7 +82,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [] # Start with an empty list
 
 ALLOWED_HOSTS = [
-    "2803-41-89-10-241.ngrok-free.app",
+    "6a9f-41-57-97-104.ngrok-free.app",
     "127.0.0.1",
     "chapchat-94s8.onrender.com",
 
@@ -91,9 +94,9 @@ FRONTEND_URL = config('FRONTEND_URL', default=None)
 if DEBUG:
     # In development, allow the local Vue server
     CORS_ALLOWED_ORIGINS.extend([
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-        "https://2803-41-89-10-241.ngrok-free.app",  # Example ngrok URL, replace with your own if needed
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://6a9f-41-57-97-104.ngrok-free.app",  # Example ngrok URL, replace with your own if needed
     ])
 elif FRONTEND_URL:
     # In production, only allow the deployed frontend URL
@@ -117,6 +120,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core_backend.wsgi.application'
+
+ASGI_APPLICATION = 'core_backend.asgi.application'  # For WebSocket support
 
 
 # Database
@@ -209,4 +214,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+}
+
+# CHANNEL_LAYERS CONFIGURATION
+# For local development, we use an in-memory channel layer.
+# For production, we will switch this to use Redis.
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
