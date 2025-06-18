@@ -1,31 +1,24 @@
 import os
-from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-# from channels.auth import AuthMiddlewareStack # For getting user in consumer
-from core_backend.middleware import TokenAuthMiddleware
 import django
+from django.core.asgi import get_asgi_application
 
+# This line MUST be at the top, before other Django imports that need settings.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core_backend.settings')
-# This call configures Django's settings.
+# This call is essential to configure Django's settings registry.
 django.setup()
 
-import whatsapp_comms.routing 
+# --- NOW that Django is set up, we can safely import Channels and our own code ---
+from channels.routing import ProtocolTypeRouter, URLRouter
+from core_backend.middleware import TokenAuthMiddleware
+import whatsapp_comms.routing
 
-
-# This is the standard Django ASGI app for handling regular HTTP requests
-django_asgi_app = get_asgi_application()
-
+# The 'application' variable must be defined at the end, after all necessary imports.
 application = ProtocolTypeRouter({
-    # For regular HTTP requests, use Django's default ASGI app.
-    "http": django_asgi_app,
+    # We define the HTTP handler first as a default.
+    # get_asgi_application() will find the default Django routing.
+    "http": get_asgi_application(),
 
-    # For WebSocket requests, use our authentication stack and URL router.
-    # "websocket": AuthMiddlewareStack(
-    #     URLRouter(
-    #         whatsapp_comms.routing.websocket_urlpatterns
-    #     )
-    # ),
-
+    # WebSocket requests are handled by our custom middleware and routing.
     "websocket": TokenAuthMiddleware(
         URLRouter(
             whatsapp_comms.routing.websocket_urlpatterns
