@@ -3,10 +3,14 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 # from channels.auth import AuthMiddlewareStack # For getting user in consumer
 from core_backend.middleware import TokenAuthMiddleware
-import whatsapp_comms.routing 
-
+import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core_backend.settings')
+# This call configures Django's settings.
+django.setup()
+
+import whatsapp_comms.routing 
+
 
 # This is the standard Django ASGI app for handling regular HTTP requests
 django_asgi_app = get_asgi_application()

@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',  # For WebSocket support
+    'channels', 
+    'channels_postgres', 
     'chapchat',
     'accounts',
     'sellers',
@@ -216,11 +217,22 @@ REST_FRAMEWORK = {
     ),
 }
 
-# CHANNEL_LAYERS CONFIGURATION
-# For local development, we use an in-memory channel layer.
-# For production, we will switch this to use Redis.
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+if config('DATABASE_URL', default=None):
+    # Production configuration using channels-postgres
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+            "CONFIG": {
+                # Use the same database as our main application for simplicity.
+                # The library will create its own tables ('channels_postgres_group', etc.)
+                "dsn": config('DATABASE_URL'),
+            },
+        },
     }
-}
+else:
+    # Development configuration using in-memory layer
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
