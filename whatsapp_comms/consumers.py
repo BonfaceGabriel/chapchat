@@ -1,41 +1,26 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from sellers.models import SellerProfile
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-@database_sync_to_async
-def get_seller_profile_pk_from_user(user):
-    """
-    Safely fetches the primary key of the SellerProfile linked to a user.
-    This function contains all the synchronous database access.
-    """
-    if not user or not user.is_authenticated:
-        return None
-    try:
-        # Accessing .seller_profile directly here is safe because this
-        # entire function is wrapped and runs in a synchronous context.
-        return user.seller_profile.pk
-    except SellerProfile.DoesNotExist:
-        return None
+from sellers.models import SellerProfile # We only need this import for the type check
 
 class InboxConsumer(AsyncWebsocketConsumer):
+    # This is an async function, so all DB calls inside must be wrapped
     async def connect(self):
-        # self.scope['user'] is populated by our TokenAuthMiddleware
         self.user = self.scope.get('user')
+        self.room_group_name = None # Initialize to None
 
+        # Check if the user is authenticated from our middleware
         if self.user is None or not self.user.is_authenticated:
             await self.close()
             return
-        
-        # --- THE DEFINITIVE FIX ---
-        # Call our async helper to safely get the profile's primary key
-        seller_profile_pk = await get_seller_profile_pk_from_user(self.user)
+
+        # --- THIS IS THE NEW, MORE DIRECT APPROACH ---
+        # We will now perform the synchronous DB check within this async method
+        # by calling a decorated inner method.
+        seller_profile_pk = await self.get_profile_pk()
 
         if seller_profile_pk is None:
-            # If the user has no seller profile, we cannot create a room.
+            # If the user has no seller profile, we cannot create a room for them.
             print(f"User {self.user.username} has no seller profile. Closing WebSocket.")
             await self.close()
             return
@@ -44,7 +29,8 @@ class InboxConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f'seller_inbox_{seller_profile_pk}'
         print(f"User {self.user.username} connecting to WebSocket group: {self.room_group_name}")
 
-        # Join the room group
+        # The error was happening here because self.channel_layer was None.
+        # This new structure should ensure it is properly initialized.
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -52,8 +38,19 @@ class InboxConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+    @database_sync_to_async
+    def get_profile_pk(self):
+        """
+        This is now a method of the class. It runs in a sync context
+        and can safely access the database via self.user.
+        """
+        try:
+            return self.user.seller_profile.pk
+        except SellerProfile.DoesNotExist:
+            return None
+
     async def disconnect(self, close_code):
-        if hasattr(self, 'room_group_name'):
+        if self.room_group_name:
             print(f"User {self.user.username} disconnecting from {self.room_group_name}")
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -61,13 +58,11 @@ class InboxConsumer(AsyncWebsocketConsumer):
             )
 
     async def receive(self, text_data):
-        # This function remains the same
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         await self.send(text_data=json.dumps({'type': 'echo', 'message': f"You said: {message}"}))
     
     async def new_order_notification(self, event):
-        # This function remains the same
         order_data = event['order']
         print(f"Sending 'new_order' notification to group {self.room_group_name}")
         await self.send(text_data=json.dumps({'type': 'new_order', 'payload': order_data}))
