@@ -1,64 +1,80 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async # (+) Import the wrapper
+from sellers.models import SellerProfile # Import the model to query
+
+# (+) Create an async helper function to fetch the profile
+@database_sync_to_async
+def get_seller_profile(user):
+    """
+    Synchronously gets the seller profile for a user but is called asynchronously.
+    """
+    try:
+        return SellerProfile.objects.get(user=user)
+    except SellerProfile.DoesNotExist:
+        return None
+
 
 class InboxConsumer(AsyncWebsocketConsumer):
-    # This function is called when a WebSocket connection is initiated.
+    # This is an async function, so all DB calls inside must be wrapped
     async def connect(self):
-        # `self.scope` is like the `request` object in Django views.
-        # It contains information about the connection, including the user.
-        self.user = self.scope['user']
+        self.user = self.scope.get('user')
 
-        # --- Check if the user is authenticated ---
-        if not self.user.is_authenticated:
-            # If the user is not logged in, reject the connection.
+        # Check if the user is authenticated
+        if self.user is None or not self.user.is_authenticated:
             await self.close()
             return
+            
+        # --- THE FIX ---
+        # Call our new async helper function to safely get the profile from the database.
+        self.seller_profile = await get_seller_profile(self.user)
 
-        # --- Create a unique channel group name for each seller ---
-        # We want to send notifications only to the relevant seller.
-        # `self.user.seller_profile.pk` gets the primary key of the logged-in seller's profile.
-        self.room_group_name = f'seller_inbox_{self.user.seller_profile.pk}'
+        if self.seller_profile is None:
+            # If the user has no seller profile, we cannot create a room for them.
+            print(f"User {self.user.username} has no seller profile. Closing WebSocket.")
+            await self.close()
+            return
+            
+        # Create a unique channel group name for each seller
+        self.room_group_name = f'seller_inbox_{self.seller_profile.pk}'
         print(f"User {self.user.username} connecting to WebSocket group: {self.room_group_name}")
 
-        # Join the room group.
-        # `self.channel_layer.group_add` adds this specific user's connection
-        # to a group that we can broadcast messages to later.
+        # Join the room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
-        # Accept the WebSocket connection. This must be the last call in `connect`.
+        # Accept the WebSocket connection
         await self.accept()
 
-    # This function is called when the WebSocket connection is closed.
     async def disconnect(self, close_code):
+        # Use hasattr to safely check if room_group_name was set before disconnecting
         if hasattr(self, 'room_group_name'):
             print(f"User {self.user.username} disconnecting from {self.room_group_name}")
-            # Leave the room group
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
 
-    # This function is called when we receive a message FROM the WebSocket client (the React app).
+    # This function handles messages sent FROM the React client
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         print(f"Received message from client {self.user.username}: {message}")
 
-        # For now, just echo the message back to the client
+        # Echo the message back to the client for now
         await self.send(text_data=json.dumps({
+            'type': 'echo',
             'message': f"You said: {message}"
         }))
     
-    # This is a custom event handler. We will call this from our M-Pesa callback view
-    # to send a 'new_order' event TO the React app.
+    # This is our custom event handler for broadcasting notifications
     async def new_order_notification(self, event):
         order_data = event['order']
         
         print(f"Sending 'new_order' notification to group {self.room_group_name}")
-        # Send the order data to the WebSocket client.
+        # Send the order data to the connected WebSocket client (our React app)
         await self.send(text_data=json.dumps({
             'type': 'new_order',
             'payload': order_data
