@@ -155,33 +155,42 @@ else:
 
 # FIXED: Channel Layers Configuration
 # The issue was with the channels_postgres configuration
-DATABASE_URL_FOR_CHANNELS = config('DATABASE_URL', default=None)
+# DATABASE_URL_FOR_CHANNELS = config('DATABASE_URL', default=None)
 
-if DATABASE_URL_FOR_CHANNELS and not DEBUG:
-    # Production configuration using channels-postgres
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
-            "CONFIG": {
-                "dsn": DATABASE_URL_FOR_CHANNELS,
-                "expiry": 60,  # Increased from 30 to 60 seconds
-                "group_expiry": 86400,  # 24 hours for group expiry
-                "capacity": 1000,  # Max messages per channel
-                "symmetric_encryption_keys": [SECRET_KEY],  # Add encryption
-            },
-        },
-    }
-else:
-    # Development configuration OR fallback if DATABASE_URL is not available
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-            "CONFIG": {
-                "capacity": 1000,
-                "expiry": 60,
-            }
-        }
-    }
+# if DATABASE_URL_FOR_CHANNELS and not DEBUG:
+#     # Production configuration using channels-postgres
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+#             "CONFIG": {
+#                 "dsn": DATABASE_URL_FOR_CHANNELS,
+#                 "expiry": 60,  # Increased from 30 to 60 seconds
+#                 "group_expiry": 86400,  # 24 hours for group expiry
+#                 "capacity": 1000,  # Max messages per channel
+#                 "symmetric_encryption_keys": [SECRET_KEY],  # Add encryption
+#             },
+#         },
+#     }
+# else:
+#     # Development configuration OR fallback if DATABASE_URL is not available
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels.layers.InMemoryChannelLayer",
+#             "CONFIG": {
+#                 "capacity": 1000,
+#                 "expiry": 60,
+#             }
+#         }
+#     }
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [REDIS_URL]},
+    },
+}
 
 # Whatsapp API configuration
 # These should be set in your .env file or environment variables
