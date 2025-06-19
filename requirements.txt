@@ -11,7 +11,7 @@ channels_postgres>=1.1.2
 charset-normalizer==3.4.2
 constantly==23.10.4
 cryptography==45.0.4
-daphne==4.2.0
+daphne
 dj-database-url==3.0.0
 Django==4.2.*
 django-cors-headers==4.7.0
