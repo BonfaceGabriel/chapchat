@@ -232,6 +232,7 @@ if not DEBUG:
             },
         },
     }
+    
 else:
     # Development configuration using the simple in-memory layer.
     CHANNEL_LAYERS = {
