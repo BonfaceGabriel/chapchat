@@ -219,21 +219,21 @@ REST_FRAMEWORK = {
 
 if not DEBUG:
     # Production configuration using channels-postgres.
-    # It uses the same database as our main Django application.
+    # It requires the DATABASE_URL environment variable to be set.
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_postgres.core.PostgresChannelLayer",
             "CONFIG": {
-                # We tell channels-postgres to use the 'default' database connection
-                # that we have already configured above with dj_database_url.
-                # This is the cleanest way and avoids duplicating credentials.
-                "db_alias": "default",
+                # This 'dsn' key is what channels-postgres uses to connect.
+                # It gets the full connection URL directly from our environment variable.
+                "dsn": config("DATABASE_URL"),
+                # Set an expiry for messages in the channel layer (in seconds).
+                "expiry": 30,
             },
         },
     }
 else:
     # Development configuration using the simple in-memory layer.
-    # This requires no extra setup for local testing.
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer"
