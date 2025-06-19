@@ -113,6 +113,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.template.context_processors.debug',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -149,6 +150,36 @@ else:
             'PASSWORD': config('DB_PASSWORD'),
             'HOST': config('DB_HOST', default='localhost'),
             'PORT': config('DB_PORT', default='5432', cast=int),
+        }
+    }
+
+# FIXED: Channel Layers Configuration
+# The issue was with the channels_postgres configuration
+DATABASE_URL_FOR_CHANNELS = config('DATABASE_URL', default=None)
+
+if DATABASE_URL_FOR_CHANNELS and not DEBUG:
+    # Production configuration using channels-postgres
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
+            "CONFIG": {
+                "dsn": DATABASE_URL_FOR_CHANNELS,
+                "expiry": 60,  # Increased from 30 to 60 seconds
+                "group_expiry": 86400,  # 24 hours for group expiry
+                "capacity": 1000,  # Max messages per channel
+                "symmetric_encryption_keys": [SECRET_KEY],  # Add encryption
+            },
+        },
+    }
+else:
+    # Development configuration OR fallback if DATABASE_URL is not available
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+            "CONFIG": {
+                "capacity": 1000,
+                "expiry": 60,
+            }
         }
     }
 
@@ -217,26 +248,23 @@ REST_FRAMEWORK = {
     ),
 }
 
-if not DEBUG:
-    # Production configuration using channels-postgres.
-    # It requires the DATABASE_URL environment variable to be set.
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_postgres.core.PostgresChannelLayer",
-            "CONFIG": {
-                # This 'dsn' key is what channels-postgres uses to connect.
-                # It gets the full connection URL directly from our environment variable.
-                "dsn": config("DATABASE_URL"),
-                # Set an expiry for messages in the channel layer (in seconds).
-                "expiry": 30,
-            },
+# Logging configuration to help debug channel layer issues
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
         },
-    }
-    
-else:
-    # Development configuration using the simple in-memory layer.
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
+    },
+    'loggers': {
+        'channels': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'channels_postgres': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
