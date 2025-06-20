@@ -3,6 +3,8 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core_backend.settings')
 
 from django.core.asgi import get_asgi_application
+app = get_asgi_application()
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from core_backend.middleware import TokenAuthMiddleware
 import whatsapp_comms.routing
@@ -14,7 +16,7 @@ import whatsapp_comms.routing
 application = ProtocolTypeRouter({
     # We define the HTTP handler first as a default.
     # get_asgi_application() will find the default Django routing.
-    "http": get_asgi_application(),
+    "http": app,
 
     # WebSocket requests are handled by our custom middleware and routing.
     "websocket": TokenAuthMiddleware(
