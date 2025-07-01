@@ -64,8 +64,8 @@ def initiate_stk_push(phone_number, amount, order_id):
     if not app_domain.startswith('http'):
          app_domain = f"https://{app_domain}"
 
-    callback_url = f"{app_domain}/api/payments/mpesa-callback/"
-    # callback_url = "https://webhook.site/8eec2b16-02de-4cf8-8c96-468956ebdf4d"
+    # callback_url = f"{app_domain}/api/payments/mpesa-callback/"
+    callback_url = "https://webhook.site/f6fab547-4dc6-4b3e-87fc-5529a5630996"
     print(f"Using M-Pesa callback URL: {callback_url}")
     
     payload = {
