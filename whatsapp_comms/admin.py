@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Conversation
+from .models import Customer, Conversation, Message
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -11,3 +11,8 @@ class ConversationAdmin(admin.ModelAdmin):
     list_display = ('customer', 'seller', 'state', 'updated_at')
     list_filter = ('state', 'seller')
     search_fields = ('customer__phone_number', 'seller__user__username')
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('conversation', 'sender', 'timestamp')
+    list_filter = ('sender',)

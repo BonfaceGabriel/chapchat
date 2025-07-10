@@ -60,5 +60,5 @@ export const useInboxSocket = () => {
     sendJsonMessage({ message });
   };
 
-  return { sendMessage };
+  return { sendMessage, lastJsonMessage };
 };
