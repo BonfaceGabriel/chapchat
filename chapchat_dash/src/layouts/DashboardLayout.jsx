@@ -42,8 +42,7 @@ function DashboardLayout() {
           </Box>
 
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            {/* We'll make /dashboard/inbox the main page later */}
-            <Link component={NavLink} to="/dashboard" sx={navLinkStyles}>
+            <Link component={NavLink} to="/dashboard/inbox" sx={navLinkStyles}>
               Inbox
             </Link>
             <Link
