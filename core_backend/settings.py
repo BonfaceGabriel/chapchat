@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'products',
     'whatsapp_comms',
     'orders',
+    'analytics',
     'rest_framework',
     'rest_framework_simplejwt', 
     

@@ -7,6 +7,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute'; 
 import ProductPage from './pages/ProductPage';
 import OrderPage from './pages/OrderPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 // (+) Create placeholder pages for dashboard sections
 const DashboardIndex = () => <div>Welcome to your Dashboard!</div>;
@@ -34,6 +35,7 @@ export default function AppRouter() {
                 { index: true, element: <DashboardIndex /> }, // Renders at /dashboard
                 { path: 'products', element: <ProductPage /> }, // Renders at /dashboard/products
                 { path: 'orders', element: <OrderPage /> }, // Renders at /dashboard/orders
+                { path: 'analytics', element: <AnalyticsPage /> },
             ],
         },
     {
