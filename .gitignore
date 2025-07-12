@@ -11,9 +11,11 @@ chapchat_dash/.env*.local
 # Logs
 npm-debug.log*
 yarn-debug.log*
+
 yarn-error.log*
 
 # Python cache
 __pycache__/
 **/__pycache__/
 *.py[cod]
+

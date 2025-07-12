@@ -8,9 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProductPage from './pages/ProductPage';
 import OrderPage from './pages/OrderPage';
 import AnalyticsPage from './pages/AnalyticsPage';
-
-// (+) Create placeholder pages for dashboard sections
-const DashboardIndex = () => <div>Welcome to your Dashboard!</div>;
+import InboxPage from './pages/InboxPage';
 
 export default function AppRouter() {
   const routes = useRoutes([
@@ -32,9 +30,10 @@ export default function AppRouter() {
             ),
             // These are the nested child routes
             children: [
-                { index: true, element: <DashboardIndex /> }, // Renders at /dashboard
-                { path: 'products', element: <ProductPage /> }, // Renders at /dashboard/products
-                { path: 'orders', element: <OrderPage /> }, // Renders at /dashboard/orders
+                { index: true, element: <InboxPage /> },
+                { path: 'inbox', element: <InboxPage /> },
+                { path: 'products', element: <ProductPage /> },
+                { path: 'orders', element: <OrderPage /> },
                 { path: 'analytics', element: <AnalyticsPage /> },
             ],
         },
