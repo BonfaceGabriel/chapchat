@@ -49,4 +49,7 @@ urlpatterns = [
     # Include the orders app URLs
     path('api/orders/', include('orders.urls')),
 
+    # Analytics endpoints
+    path('api/analytics/', include('analytics.urls')),
+
 ]

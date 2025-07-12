@@ -24,7 +24,8 @@ export const useInboxSocket = () => {
       // We will send the JWT token as a query parameter for authentication
       // This is a common pattern for authenticating WebSocket connections
       queryParams: { token: accessToken },
-      shouldReconnect: (_closeEvent) => true, // Automatically reconnect
+      // Always reconnect on close
+      shouldReconnect: () => true,
     }
   );
 

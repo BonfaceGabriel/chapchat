@@ -7,8 +7,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute'; 
 import ProductPage from './pages/ProductPage';
 import OrderPage from './pages/OrderPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 import InboxPage from './pages/InboxPage';
-const AnalyticsPlaceholder = () => <div>Analytics coming soon.</div>;
 
 export default function AppRouter() {
   const routes = useRoutes([
@@ -34,7 +34,7 @@ export default function AppRouter() {
                 { path: 'inbox', element: <InboxPage /> },
                 { path: 'products', element: <ProductPage /> },
                 { path: 'orders', element: <OrderPage /> },
-                { path: 'analytics', element: <AnalyticsPlaceholder /> },
+                { path: 'analytics', element: <AnalyticsPage /> },
             ],
         },
     {

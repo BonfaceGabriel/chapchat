@@ -1,15 +1,21 @@
+# Environment and config files
 env/
 .env
 
-node_modules/ # General catch-all
-chapchat_dash/node_modules/ # More specific if needed
+# Node dependencies
+node_modules/
+chapchat_dash/node_modules/
 chapchat_dash/dist/
 chapchat_dash/.env*.local
-chapchat_dash/dist/
 
-
+# Logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*__pycache__/
-*.pyc
-db.sqlite3
+
+yarn-error.log*
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
